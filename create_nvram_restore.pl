@@ -1,7 +1,10 @@
 #!/usr/bin/perl -w
 
+use Cwd;
+use File::Basename;
 use strict;
 
+my $scriptdir = dirname Cwd::abs_path($0);
 
 my %varre;
 my @varfiles = qw(vars_to_skip vars_to_include vars_preferred);
@@ -28,7 +31,7 @@ while ($buf) {
   
   if ($var !~ /$varre{vars_to_skip}/) {
     my $encval = $val;
-    $encval =~ s/([\$`"\\])/\\\1/g;
+    $encval =~ s/([\$`"\\])/\\$1/g;
     print "nvram set $var=\"$encval\"\n";
   }
 }
@@ -36,7 +39,9 @@ while ($buf) {
 
 sub get_vars_files
 {
-  foreach my $file (@varfiles) {
+  foreach my $vtype (@varfiles) {
+    my $file = $vtype;
+    $file = "$scriptdir/$vtype" unless -f $file;
     next unless -f $file;
     open(FILE, $file);
     my @patterns;
@@ -46,6 +51,6 @@ sub get_vars_files
     }
     push @patterns, "^traff-";
     close(FILE);
-    $varre{$file} = "(" . join('|', @patterns) . ")";
+    $varre{$vtype} = "(" . join('|', @patterns) . ")";
   }
 }
