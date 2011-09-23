@@ -28,7 +28,8 @@ while ($buf) {
   $buf = substr $buf, 2;
   my $val = substr $buf, 0, $len;
   $buf = substr $buf, $len;
-  
+
+  next if $val eq '';
   if ($var !~ /$varre{vars_to_skip}/) {
     my $encval = $val;
     $encval =~ s/([\$`"\\])/\\$1/g;
