@@ -10,6 +10,21 @@ my %varre;
 my @varfiles = qw(vars_to_skip vars_to_include vars_preferred);
 
 my $nvram = $ARGV[0];
+my $vartype = $ARGV[1] || 'preferred';
+
+if ($vartype) {
+  if ($vartype =~ /pref/) {
+    $vartype = 'vars_preferred';
+  }
+  elsif ($vartype eq 'all') {
+    $vartype = '';
+  }
+  else {
+    die "unknown vartype\n";
+  }
+}
+
+
 
 get_vars_files();
 
@@ -30,6 +45,7 @@ while ($buf) {
   $buf = substr $buf, $len;
 
   next if $val eq '';
+  next if $vartype && !( $var =~ /$varre{$vartype}/);
   if ($var !~ /$varre{vars_to_skip}/) {
     my $encval = $val;
     $encval =~ s/([\$`"\\])/\\$1/g;
@@ -50,7 +66,7 @@ sub get_vars_files
       chomp;
       push @patterns, $_;
     }
-    push @patterns, "^traff-";
+    push @patterns, "^traff-" if $vtype =~ /skip/;
     close(FILE);
     $varre{$vtype} = "(" . join('|', @patterns) . ")";
   }
